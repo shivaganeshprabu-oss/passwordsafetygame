@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Password Strength Rater</title>
+    <style>
+        :root {
+            --bg-color: #f4f7f6;
+            --container-bg: #ffffff;
+            --text-color: #333;
+            --empty-bar: #e0e0e0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .card {
+            background: var(--container-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: row;
+            gap: 20px;
+            align-items: stretch;
+            width: 400px;
+        }
+
+        .input-section {
+            flex: 1;
+        }
+
+        h2 { margin-top: 0; font-size: 1.2rem; color: var(--text-color); }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+            box-sizing: border-box;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        input:focus { border-color: #4a90e2; }
+
+        /* The Strength Bar Container */
+        .bar-container {
+            width: 20px;
+            background-color: var(--empty-bar);
+            border-radius: 10px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column-reverse; /* Fills from bottom to top */
+        }
+
+        /* The Dynamic Filling Part */
+        .strength-fill {
+            width: 100%;
+            height: 0%; /* Start at 0% */
+            transition: height 0.4s ease, background-color 0.4s ease;
+            background-color: #ff4d4d; /* Start Red */
+        }
+
+        .status-text {
+            margin-top: 10px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <div class="input-section">
+            <h2>Password Rater</h2>
+            <input type="password" id="passwordInput" placeholder="Enter password...">
+            <div id="status" class="status-text">Strength: Too Short</div>
+        </div>
+
+        <div class="bar-container">
+            <div id="strengthBar" class="strength-fill"></div>
+        </div>
+    </div>
+
+    <script>
+        const passwordInput = document.getElementById('passwordInput');
+        const strengthBar = document.getElementById('strengthBar');
+        const statusText = document.getElementById('status');
+
+        passwordInput.addEventListener('input', () => {
+            const val = passwordInput.value;
+            let score = 0;
+
+            if (val.length === 0) score = 0;
+            else {
+                // Scoring Logic
+                if (val.length >= 8) score++;      // Length check
+                if (/[A-Z]/.test(val)) score++;     // Uppercase
+                if (/[0-9]/.test(val)) score++;     // Numbers
+                if (/[^A-Za-z0-9]/.test(val)) score++; // Special Characters
+            }
+
+            updateUI(score, val.length);
+        });
+
+        function updateUI(score, length) {
+            let height = "0%";
+            let color = "#ff4d4d"; // Red
+            let label = "Weak";
+
+            if (length > 0) {
+                // Map score (0-4) to height (25%-100%)
+                const percentage = (score / 4) * 100;
+                height = percentage + "%";
+
+                if (score <= 1) {
+                    color = "#ff4d4d"; // Red
+                    label = "Weak";
+                } else if (score === 2) {
+                    color = "#ffa500"; // Orange
+                    label = "Medium";
+                } else if (score === 3) {
+                    color = "#94d82d"; // Light Green
+                    label = "Strong";
+                } else {
+                    color = "#40c057"; // Green
+                    label = "Very Secure";
+                }
+            } else {
+                label = "Enter a password";
+            }
+
+            strengthBar.style.height = height;
+            strengthBar.style.backgroundColor = color;
+            statusText.innerText = `Strength: ${label}`;
+            statusText.style.color = color;
+        }
+    </script>
+</body>
+</html>
